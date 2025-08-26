@@ -36,7 +36,7 @@ class CategoryController extends Controller
 
         Category::create($request->all());
 
-        return redirect()->route('category.index');
+        return redirect()->route('category.index')->with('success', 'Data Berhasil Ditambahkan');
     }
 
     /**
@@ -70,7 +70,7 @@ class CategoryController extends Controller
 
         $category->update($request->all());
 
-        return redirect()->route('category.index');
+        return redirect()->route('category.index')->with('update', 'Data Berhasil Diperbaharui');
     }
 
     /**
@@ -82,6 +82,6 @@ class CategoryController extends Controller
 
         $category->delete();
 
-        return redirect()->route('category.index');
+        return redirect()->route('category.index')->with('delete', 'Data Berhasil Dihapus');
     }
 }
