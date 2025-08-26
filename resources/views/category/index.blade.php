@@ -1,7 +1,12 @@
 @extends('layouts.app', ['title' => 'Data Kategori'])
 
 @section('content')
-    <h2>halo from category</h2>
+    <h2>Data Kategori</h2>
+    @if (session('success'))
+        <div class="alert alert-success" role="alert">
+            {{ $message }}
+        </div>
+    @endif
     <a href="{{ route('category.create') }}" class="btn btn-primary"> Tambah Kategori</a>
     <table class="table">
         <thead>
@@ -17,7 +22,7 @@
                     <th scope="row">{{ $loop->iteration }}</th>
                     <td>{{ $d->name }}</td>
                     <td>
-                        <a href="{{ route('category.edit', $d->id) }}"> Edit</a>
+                        <a class="btn btn-primary" href="{{ route('category.edit', $d->id) }}"> Edit</a>
                         <!-- Button trigger modal -->
                         <button type="button" class="btn btn-danger" data-bs-toggle="modal"
                             data-bs-target="#hapus-{{ $d->id }}">
