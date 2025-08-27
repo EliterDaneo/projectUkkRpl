@@ -14,7 +14,8 @@
             {{ session('delete') }}
         </div>
     @endif
-    <a href="{{ route('category.create') }}" class="btn btn-outline-primary mt-3"><i class="bi bi-plus"></i> Tambah Kategori</a>
+    <a href="{{ route('category.create') }}" class="btn btn-outline-primary mt-3"><i class="bi bi-plus"></i> Tambah
+        Kategori</a>
     <div class="card mt-3">
         <div class="card-header">
             Data Kategori
@@ -77,9 +78,9 @@
                             <td colspan="3" class="text-center">Data Kosong</td>
                         </tr>
                     @endforelse
-
                 </tbody>
             </table>
+            {{ $data->links('pagination::bootstrap-5') }}
         </div>
     </div>
 @endsection

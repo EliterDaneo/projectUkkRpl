@@ -12,7 +12,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $data = Category::latest()->get();
+        $data = Category::latest()->paginate(10);
 
         return view("category.index", compact("data"));
     }
