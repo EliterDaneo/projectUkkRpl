@@ -9,4 +9,4 @@ Route::get('/', function () {
 });
 
 Route::resource('/category', CategoryController::class, ['except' => ['show']]);
-Route::resource('/supplier', SupplierController::class, ['except' => ['create', 'show', 'edit']]);
+Route::resource('/supplier', SupplierController::class, ['except' => ['show']]);

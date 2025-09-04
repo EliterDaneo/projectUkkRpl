@@ -30,6 +30,7 @@ class SupplierController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request->all());
         $request->validate([
             'name' => 'required|string|unique:suppliers|min:3',
             'address' => 'required|string|min:3',
