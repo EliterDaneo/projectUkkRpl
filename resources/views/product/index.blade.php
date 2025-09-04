@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Data Kategori'])
+@extends('layouts.app', ['title' => 'Data Produk'])
 
 @section('content')
     @if (session('success'))
@@ -14,20 +14,23 @@
             {{ session('delete') }}
         </div>
     @endif
-    <a href="{{ route('supplier.create') }}" class="btn btn-outline-primary mt-3"><i class="bi bi-plus"></i> Tambah
-        Supplier</a>
+    <a href="{{ route('product.create') }}" class="btn btn-outline-primary mt-3"><i class="bi bi-plus"></i> Tambah
+        Produk</a>
     <div class="card mt-3">
         <div class="card-header">
-            Data Supplier
+            Data Produk
         </div>
         <div class="card-body">
             <table class="table">
                 <thead>
                     <tr>
                         <th scope="col">No</th>
-                        <th scope="col">Nama</th>
-                        <th scope="col">No Hp</th>
-                        <th scope="col">Alamat</th>
+                        <th scope="col">Kategori</th>
+                        <th scope="col">Nama Supplier</th>
+                        <th scope="col">Nama Produk</th>
+                        <th scope="col">Diskripsi</th>
+                        <th scope="col">Stok</th>
+                        <th scope="col">Harga Satuan</th>
                         <th scope="col" width="20%">Aksi</th>
                     </tr>
                 </thead>
@@ -35,11 +38,14 @@
                     @forelse ($data as $d)
                         <tr>
                             <th scope="row">{{ $loop->iteration }}</th>
+                            <td>{{ $d->category->name }}</td>
+                            <td>{{ $d->supplier->name }}</td>
                             <td>{{ $d->name }}</td>
-                            <td>{{ $d->phone }}</td>
-                            <td>{{ $d->address }}</td>
+                            <td>{!! $d->description !!}</td>
+                            <td>{{ $d->stock }}</td>
+                            <td>{{ number_format($d->price,'0',',','.') }}</td>
                             <td>
-                                <a class="btn btn-outline-primary" href="{{ route('supplier.edit', $d->id) }}"><i
+                                <a class="btn btn-outline-primary" href="{{ route('category.edit', $d->id) }}"><i
                                         class="bi bi-pencil"></i> Edit</a>
                                 <!-- Button trigger modal -->
                                 <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
@@ -63,7 +69,7 @@
                                                     <strong>{{ $d->name }}</strong>
                                                 </p>
                                             </div>
-                                            <form action="{{ route('supplier.destroy', $d->id) }}" method="post">
+                                            <form action="{{ route('category.destroy', $d->id) }}" method="post">
                                                 @csrf
                                                 @method('DELETE')
                                                 <div class="modal-footer">

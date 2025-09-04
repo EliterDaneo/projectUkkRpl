@@ -36,6 +36,7 @@
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="{{ route('category.index') }}">Kategori</a></li>
                             <li><a class="dropdown-item" href="{{ route('supplier.index') }}">Supplier</a></li>
+                            <li><a class="dropdown-item" href="{{ route('product.index') }}">Produk</a></li>
                         </ul>
                     </li>
                 </ul>

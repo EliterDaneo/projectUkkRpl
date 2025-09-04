@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Supplier;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
-        $data = Supplier::latest()->paginate(10);
-
-        return view("data.index", compact("data"));
+        $data = Product::with(['category', 'user', 'supplier'])->get();
+        return view("product.index", compact("data"));
     }
 
     /**
@@ -19,7 +21,7 @@ class ProductController extends Controller
      */
     public function create()
     {
-        return view("data.create");
+        //
     }
 
     /**
@@ -27,13 +29,7 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|unique:categories|min:3',
-        ]);
-
-        Supplier::create($request->all());
-
-        return redirect()->route('supplier.index')->with('success', 'Data Berhasil Ditambahkan');
+        //
     }
 
     /**
@@ -49,9 +45,7 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        $category = Supplier::findOrFail($id);
-
-        return view('data.edit', compact('category'));
+        //
     }
 
     /**
@@ -59,15 +53,7 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $request->validate([
-            'name' => 'required|string|unique:categories|min:3',
-        ]);
-
-        $category = Supplier::findOrFail($id);
-
-        $category->update($request->all());
-
-        return redirect()->route('supplier.index')->with('update', 'Data Berhasil Diperbaharui');
+        //
     }
 
     /**
@@ -75,10 +61,6 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        $category = Supplier::findOrFail($id);
-
-        $category->delete();
-
-        return redirect()->route('supplier.index')->with('delete', 'Data Berhasil Dihapus');
+        //
     }
 }
