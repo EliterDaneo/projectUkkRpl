@@ -28,22 +28,27 @@
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="#">Home</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Menu Utama
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="{{ route('category.index') }}">Kategori</a></li>
-                            <li><a class="dropdown-item" href="{{ route('supplier.index') }}">Supplier</a></li>
-                            <li><a class="dropdown-item" href="{{ route('product.index') }}">Produk</a></li>
-                        </ul>
-                    </li>
+                    @auth(Auth::check() && Auth::user()->role == 'admin')
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                Menu Utama
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{{ route('category.index') }}">Kategori</a></li>
+                                <li><a class="dropdown-item" href="{{ route('supplier.index') }}">Supplier</a></li>
+                                <li><a class="dropdown-item" href="{{ route('product.index') }}">Produk</a></li>
+                            </ul>
+                        </li>
+                    @endauth
                 </ul>
-                <form class="d-flex">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-outline-success" type="submit">Search</button>
-                </form>
+                <div class="d-flex">
+                    @if (Auth::check())
+                        <a class="btn btn-outline-primary"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                    @else
+                        <a class="btn btn-outline-success"><i class="bi bi-person-circle"></i> Buat Akun</a>
+                    @endif
+                </div>
             </div>
         </div>
     </nav>
