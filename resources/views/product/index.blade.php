@@ -69,13 +69,14 @@
                                                     <strong>{{ $d->name }}</strong>
                                                 </p>
                                             </div>
-                                            <form action="{{ route('category.destroy', $d->id) }}" method="post">
+                                            <form action="{{ route('product.destroy', $d->id) }}" method="post">
                                                 @csrf
                                                 @method('DELETE')
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
+                                                    <button type="button" class="btn btn-outline-secondary"
                                                         data-bs-dismiss="modal">Close</button>
-                                                    <button type="submit" class="btn btn-danger">Hapus</button>
+                                                    <button type="submit" class="btn btn-outline-danger"><i
+                                                            class="bi bi-trash"></i> Hapus</button>
                                                 </div>
                                             </form>
                                         </div>

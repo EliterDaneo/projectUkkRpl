@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Category;
+use App\Models\Supplier;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -21,6 +23,9 @@ class ProductController extends Controller
      */
     public function create()
     {
+        $categories = Category::latest();
+        $suppliers = Supplier::latest();
+        
         return view("product.create");
     }
 
