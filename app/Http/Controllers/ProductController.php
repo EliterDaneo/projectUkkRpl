@@ -12,7 +12,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $data = Product::with(['category', 'user', 'supplier'])->get();
+        $data = Product::with(['category', 'user', 'supplier'])->paginate(10);
         return view("product.index", compact("data"));
     }
 
@@ -21,7 +21,7 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //
+        return view("product.create");
     }
 
     /**

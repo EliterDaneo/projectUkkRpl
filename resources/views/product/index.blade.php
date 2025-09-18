@@ -43,7 +43,7 @@
                             <td>{{ $d->name }}</td>
                             <td>{!! $d->description !!}</td>
                             <td>{{ $d->stock }}</td>
-                            <td>{{ number_format($d->price,'0',',','.') }}</td>
+                            <td>{{ number_format($d->price, '0', ',', '.') }}</td>
                             <td>
                                 <a class="btn btn-outline-primary" href="{{ route('category.edit', $d->id) }}"><i
                                         class="bi bi-pencil"></i> Edit</a>
@@ -85,7 +85,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3" class="text-center">Data Kosong</td>
+                            <td colspan="8" class="text-center">Data Kosong</td>
                         </tr>
                     @endforelse
                 </tbody>

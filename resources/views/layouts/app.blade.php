@@ -15,7 +15,7 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
         <div class="container-fluid">
             <a class="navbar-brand" href="/">E-commerce</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -25,9 +25,9 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
+                    {{-- <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="#">Home</a>
-                    </li>
+                    </li> --}}
                     @auth(Auth::check() && Auth::user()->role == 'admin')
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -46,7 +46,46 @@
                     @if (Auth::check())
                         <a class="btn btn-outline-primary"><i class="bi bi-speedometer2"></i> Dashboard</a>
                     @else
-                        <a class="btn btn-outline-success"><i class="bi bi-person-circle"></i> Buat Akun</a>
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-outline-success" data-bs-toggle="modal"
+                            data-bs-target="#exampleModal">
+                            <i class="bi bi-person-circle"></i>
+                            Login
+                        </button>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                            aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Modal Login</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form>
+                                            <div class="mb-3">
+                                                <label for="exampleInputEmail1" class="form-label">Email address</label>
+                                                <input type="email" class="form-control" id="exampleInputEmail1"
+                                                    aria-describedby="emailHelp">
+                                                <div id="emailHelp" class="form-text">We'll never share your email with
+                                                    anyone else.</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="exampleInputPassword1" class="form-label">Password</label>
+                                                <input type="password" class="form-control" id="exampleInputPassword1">
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-primary">Login</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     @endif
                 </div>
             </div>
