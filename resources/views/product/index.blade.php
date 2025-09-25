@@ -42,10 +42,10 @@
                             <td>{{ $d->supplier->name }}</td>
                             <td>{{ $d->name }}</td>
                             <td>{!! $d->description !!}</td>
-                            <td>{{ $d->stock }}</td>
-                            <td>{{ number_format($d->price, '0', ',', '.') }}</td>
+                            <td>{{ $d->stock }} Pcs</td>
+                            <td>Rp. {{ number_format($d->price, '0', ',', '.') }}</td>
                             <td>
-                                <a class="btn btn-outline-primary" href="{{ route('category.edit', $d->id) }}"><i
+                                <a class="btn btn-outline-primary" href="{{ route('product.edit', $d->slug) }}"><i
                                         class="bi bi-pencil"></i> Edit</a>
                                 <!-- Button trigger modal -->
                                 <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
