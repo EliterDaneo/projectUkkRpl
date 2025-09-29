@@ -61,7 +61,7 @@ class ProductController extends Controller
             'stock' => $request->f,
             'description' => $request->g,
             // 'user_id' => Auth::user()->id,
-            'user_id' => 1,
+            // 'user_id' => 1,
             'slug' => Str::slug($request->c, '-'),
 
             //andi apriliano -> andi-apriliano -> seo
