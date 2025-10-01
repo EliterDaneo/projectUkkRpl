@@ -14,6 +14,8 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::resource('/category', CategoryController::class, ['except' => ['show']]);
     Route::resource('/supplier', SupplierController::class, ['except' => ['show']]);
     Route::resource('/product', ProductController::class, ['except' => ['show']]);

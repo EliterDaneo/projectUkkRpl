@@ -28,7 +28,7 @@
                     {{-- <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="#">Home</a>
                     </li> --}}
-                    @auth(Auth::check() && Auth::user()->role == 'admin')
+                    @if (Auth::check() && Auth::user()->role == 'admin')
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                                 data-bs-toggle="dropdown" aria-expanded="false">
@@ -40,11 +40,44 @@
                                 <li><a class="dropdown-item" href="{{ route('product.index') }}">Produk</a></li>
                             </ul>
                         </li>
-                    @endauth
+                    @endif
                 </ul>
                 <div class="d-flex">
                     @if (Auth::check())
                         <a class="btn btn-outline-primary"><i class="bi bi-speedometer2"></i> Dashboard</a>
+
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
+                            data-bs-target="#exampleModal">
+                            <i class="bi bi-box-arrow-right"></i>
+                            Logout
+                        </button>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                            aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Modal Logout</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Apakah anda yakin ingin logout</p>
+                                        <form action="{{ route('logout') }}" method="POST">
+                                            @csrf
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">Close</button>
+                                                <button type="submit" class="btn btn-danger"><i
+                                                        class="bi bi-box-arrow-right"></i> Logout</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     @else
                         <!-- Button trigger modal -->
                         <button type="button" class="btn btn-outline-success" data-bs-toggle="modal"
@@ -64,13 +97,15 @@
                                             aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="{{ route('login') }}" method="POST">
+                                        <form action="{{ route('proses-login') }}" method="POST">
                                             @csrf
                                             <div class="mb-3">
-                                                <label for="exampleInputEmail1" class="form-label">Email address</label>
+                                                <label for="exampleInputEmail1" class="form-label">Email
+                                                    address</label>
                                                 <input type="email" name="email" class="form-control"
                                                     id="exampleInputEmail1" aria-describedby="emailHelp">
-                                                <div id="emailHelp" class="form-text">We'll never share your email with
+                                                <div id="emailHelp" class="form-text">We'll never share your email
+                                                    with
                                                     anyone else.</div>
                                             </div>
                                             <div class="mb-3">
