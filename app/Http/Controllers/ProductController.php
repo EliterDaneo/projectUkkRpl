@@ -41,7 +41,7 @@ class ProductController extends Controller
             'a' => 'required|numeric|exists:categories,id',
             'b' => 'required|numeric|exists:suppliers,id',
             'c' => 'required|string|min:3',
-            'd' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'd' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'e' => 'required|numeric|min:3',
             'f' => 'required|numeric|min:3',
             'g' => 'required|string|min:3',
@@ -49,9 +49,12 @@ class ProductController extends Controller
             'a.required' => 'Data Tidak Ditemukan di Kategori',
         ]);
 
-        // dd($request->all());
-
-        // Product::create($request->all());
+        // Handle file upload
+        if ($request->hasFile('d')) {
+            $image = $request->file('d');
+            $imagePath = 'images/products/' . $image->hashName();
+            $image->storeAs('public/images/products', $image->hashName());
+        }
 
         Product::create([
             'category_id' => $request->a,
@@ -60,11 +63,9 @@ class ProductController extends Controller
             'price' => $request->e,
             'stock' => $request->f,
             'description' => $request->g,
-            // 'user_id' => Auth::user()->id,
-            // 'user_id' => 1,
+            'user_id' => Auth::user()->id,
+            'image' => $imagePath,
             'slug' => Str::slug($request->c, '-'),
-
-            //andi apriliano -> andi-apriliano -> seo
         ]);
 
         return redirect()->route('product.index')->with('success', 'Data Berhasil ditambahkan');
