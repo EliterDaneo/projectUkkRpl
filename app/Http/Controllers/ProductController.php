@@ -171,6 +171,16 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $product = Product::findOrFail($id);
+        // 1. Hapus gambar terkait dari storage (disk 'public')
+        if ($product->image && Storage::disk('public')->exists($product->image)) {
+            Storage::disk('public')->delete($product->image);
+        }
+
+        // 2. Hapus data produk dari database
+        $product->delete();
+
+        // 3. Redirect dengan pesan sukses
+        return redirect()->route('product.index')->with('success', 'Produk berhasil dihapus!');
     }
 }
