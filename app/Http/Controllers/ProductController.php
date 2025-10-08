@@ -8,6 +8,7 @@ use App\Models\Supplier;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -101,11 +102,12 @@ class ProductController extends Controller
      */
     public function edit(string $slug)
     {
-        $product = Product::where('slug', '=', $slug)->first();
+        // Pastikan Anda juga mengirim data categories dan suppliers ke view
+        // Anda perlu menyesuaikan ini dengan cara Anda mengambil data categories dan suppliers
+        $categories = Category::all(); // Contoh: Ganti dengan cara Anda mengambil Category
+        $suppliers = Supplier::all();   // Contoh: Ganti dengan cara Anda mengambil Supplier
 
-        echo $product;
-        $categories = Category::all();
-        $suppliers = Supplier::all();
+        $product = Product::where('slug', $slug)->firstOrFail();
 
         return view('product.edit', compact('product', 'categories', 'suppliers'));
     }
@@ -115,7 +117,53 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'a' => 'required|numeric|exists:categories,id', // category_id
+            'b' => 'required|numeric|exists:suppliers,id', // supplier_id
+            'c' => 'required|string|min:3', // name
+            // 'd' (image) is now optional for update, but still validated if present
+            'd' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048|nullable',
+            'e' => 'required|numeric|min:1', // price (diasumsikan minimal 1)
+            'f' => 'required|numeric|min:0', // stock (diasumsikan minimal 0)
+            'g' => 'required|string|min:3', // description
+        ], [
+            'a.required' => 'Wajib memilih Kategori.',
+            'a.exists'   => 'Data Kategori tidak ditemukan.',
+            // Tambahkan pesan custom untuk validasi lainnya di sini
+        ]);
+
+        $product = Product::findOrFail($id);
+
+        $data = [
+            'category_id' => $request->a,
+            'supplier_id' => $request->b,
+            'name'        => $request->c,
+            'price'       => $request->e,
+            'stock'       => $request->f,
+            'description' => $request->g,
+            'user_id'     => Auth::user()->id,
+            'slug'        => Str::slug($request->c, '-'),
+        ];
+
+        // Handle file upload/update
+        if ($request->hasFile('d')) {
+            // Hapus gambar lama jika ada
+            if ($product->image && Storage::disk('public')->exists($product->image)) {
+                Storage::disk('public')->delete($product->image);
+            }
+
+            $image = $request->file('d');
+            // Simpan gambar baru
+            $image->storeAs('images/products', $image->hashName(), 'public');
+
+            // Simpan path ke database
+            $data['image'] = 'images/products/' . $image->hashName();
+        }
+
+        // Update data produk
+        $product->update($data);
+
+        return redirect()->route('product.index')->with('success', 'Data Produk Berhasil diupdate!');
     }
 
     /**
