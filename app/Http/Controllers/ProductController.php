@@ -53,7 +53,7 @@ class ProductController extends Controller
         if ($request->hasFile('d')) {
             $image = $request->file('d');
             $imagePath = 'images/products/' . $image->hashName();
-            $image->storeAs('public/images/products', $image->hashName());
+            $image->storeAs('images/products', $image->hashName(), 'public');
         }
 
         Product::create([

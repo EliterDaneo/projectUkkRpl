@@ -25,6 +25,7 @@
                 <thead>
                     <tr>
                         <th scope="col">No</th>
+                        <th scope="col">Foto</th>
                         <th scope="col">Kategori</th>
                         <th scope="col">Nama Supplier</th>
                         <th scope="col">Nama Produk</th>
@@ -39,6 +40,7 @@
                         <tr>
                             <th scope="row">{{ $loop->iteration }}</th>
                             <td>{{ $d->category->name }}</td>
+                            <td><img src="{{ asset('public/images/products/' . $d->image) }}" alt="foto" width="80px"></td>
                             <td>{{ $d->supplier->name }}</td>
                             <td>{{ $d->name }}</td>
                             <td>{!! $d->description !!}</td>
