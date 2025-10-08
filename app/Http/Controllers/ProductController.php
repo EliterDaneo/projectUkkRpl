@@ -37,38 +37,55 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'a' => 'required|numeric|exists:categories,id',
-            'b' => 'required|numeric|exists:suppliers,id',
-            'c' => 'required|string|min:3',
-            'd' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'e' => 'required|numeric|min:3',
-            'f' => 'required|numeric|min:3',
-            'g' => 'required|string|min:3',
+        // 1. Validation
+        $validated = $request->validate([
+            'a' => 'required|numeric|exists:categories,id', // category_id
+            'b' => 'required|numeric|exists:suppliers,id', // supplier_id
+            'c' => 'required|string|min:3|max:255',        // name
+            'd' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // image
+            'e' => 'required|numeric|min:1',              // price (min 1, assuming price > 0)
+            'f' => 'required|numeric|min:0',              // stock (min 0)
+            'g' => 'required|string|min:3',               // description
         ], [
-            'a.required' => 'Data Tidak Ditemukan di Kategori',
+            'a.required' => 'Wajib memilih Kategori.',
+            'a.numeric'  => 'Pilihan Kategori tidak valid.',
+            'a.exists'   => 'Data Kategori tidak ditemukan.',
+            // Add more specific Indonesian messages for other fields for a better UX
+            'b.required' => 'Wajib memilih Suplier.',
+            'c.required' => 'Nama Produk wajib diisi.',
+            'e.min'      => 'Harga harus minimal 1.',
+            // ... and so on for all fields
         ]);
 
-        // Handle file upload
+        $imagePath = null;
+
+        // 2. Handle file upload
         if ($request->hasFile('d')) {
             $image = $request->file('d');
+            // 'public' is the disk name, e.g., defined in config/filesystems.php
+            $storedPath = $image->storeAs('images/products', $image->hashName(), 'public');
+
+            // Use the relative path for the database
+            // Note: The correct path for the DB should exclude the disk name, 
+            // using the path relative to the 'public' disk root.
             $imagePath = 'images/products/' . $image->hashName();
-            $image->storeAs('images/products', $image->hashName(), 'public');
         }
 
+        // 3. Create Product
         Product::create([
-            'category_id' => $request->a,
-            'supplier_id' => $request->b,
-            'name' => $request->c,
-            'price' => $request->e,
-            'stock' => $request->f,
-            'description' => $request->g,
-            'user_id' => Auth::user()->id,
-            'image' => $imagePath,
-            'slug' => Str::slug($request->c, '-'),
+            'category_id' => $validated['a'], // Using validated data is safer
+            'supplier_id' => $validated['b'],
+            'name'        => $validated['c'],
+            'price'       => $validated['e'],
+            'stock'       => $validated['f'],
+            'description' => $validated['g'],
+            'user_id'     => Auth::user()->id,
+            'image'       => $imagePath,
+            'slug'        => Str::slug($validated['c'], '-'),
         ]);
 
-        return redirect()->route('product.index')->with('success', 'Data Berhasil ditambahkan');
+        // 4. Redirect with success
+        return redirect()->route('product.index')->with('success', 'Data Berhasil ditambahkan. Produk baru sudah tersedia.');
     }
 
     /**
