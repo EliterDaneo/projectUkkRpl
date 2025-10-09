@@ -115,7 +115,7 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $slug)
     {
         $request->validate([
             'a' => 'required|numeric|exists:categories,id', // category_id
@@ -132,7 +132,7 @@ class ProductController extends Controller
             // Tambahkan pesan custom untuk validasi lainnya di sini
         ]);
 
-        $product = Product::findOrFail($id);
+        $product = Product::where('slug', $slug)->firstOrFail();
 
         $data = [
             'category_id' => $request->a,
