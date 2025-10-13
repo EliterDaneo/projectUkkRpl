@@ -1,14 +1,23 @@
-@extends('layouts.app', ['title' => 'Halaman Kasir'])
+@extends('layouts.app', ['title' => 'Halaman Kasir Interaktif'])
 
 @section('content')
-    {{-- Container utama kasir --}}
     <div class="container-fluid mt-4">
+        {{-- Tombol Laporan --}}
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="m-0">Sistem Kasir (POS)</h2>
+            <a href="{{ route('kasir.report.pdf') }}" class="btn btn-info" target="_blank">
+                <i class="fas fa-file-pdf"></i> Generate Laporan Penjualan
+            </a>
+        </div>
+        <hr>
+
         <div class="row">
             {{-- Kolom Kategori (Kiri: col-md-3) --}}
             <div class="col-md-3">
                 <div class="card shadow p-3 mb-5 bg-light rounded">
                     <h4 class="mb-3">Daftar Kategori</h4>
                     <div class="list-group" id="category-list">
+                        {{-- Kategori akan diambil dari $categories yang di-pass dari Controller --}}
                         @foreach ($categories as $category)
                             <button type="button" class="list-group-item list-group-item-action category-item"
                                 data-category-id="{{ $category->id }}">
@@ -42,25 +51,42 @@
                         </table>
                     </div>
 
-                    {{-- Total dan Pembayaran --}}
+                    {{-- Total, PPN, dan Pembayaran --}}
                     <div class="row">
                         <div class="col-md-6">
-                            <h5>Total Belanja: <span class="badge bg-primary fs-5" id="total-price-display">Rp 0</span></h5>
-                            <input type="hidden" id="total-price-value" value="0">
+                            {{-- Input PPN yang Fleksibel --}}
+                            <div class="mb-3">
+                                <label for="ppn-rate" class="form-label">Persentase PPN (%)</label>
+                                <input type="number" id="ppn-rate" class="form-control" value="11" min="0"
+                                    max="100">
+                            </div>
+
+                            {{-- Tampilan Rincian Harga --}}
+                            <h5 class="mt-3">Total Harga (Base): <span class="badge bg-secondary"
+                                    id="total-price-base-display">Rp 0</span></h5>
+                            <h5>PPN <span id="ppn-rate-display">11</span>%: <span class="badge bg-warning text-dark"
+                                    id="ppn-amount-display">Rp 0</span></h5>
+                            <hr>
+                            <h5 class="text-success">TOTAL BAYAR: <span class="badge bg-success fs-5"
+                                    id="total-price-final-display">Rp 0</span></h5>
+
+                            <input type="hidden" id="total-price-base-value" value="0">
+                            <input type="hidden" id="total-price-final-value" value="0">
                         </div>
+
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="payment-amount" class="form-label">Jumlah Pembayaran (Tunai)</label>
+                                <label for="payment-amount" class="form-label">Jumlah Pembayaran (Uang Tunai)</label>
                                 <input type="number" id="payment-amount" class="form-control" value="0"
                                     min="0">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Kembalian</label>
-                                <p class="form-control-static fs-4 text-success" id="change-amount-display">Rp 0</p>
+                                <p class="form-control-static fs-4 text-danger" id="change-amount-display">Rp 0</p>
                             </div>
 
-                            <button class="btn btn-success w-100" id="process-payment-btn" disabled>
-                                Proses Pembayaran
+                            <button class="btn btn-primary w-100" id="process-payment-btn" disabled>
+                                <i class="fas fa-money-bill-wave"></i> Proses Pembayaran
                             </button>
                         </div>
                     </div>
@@ -92,7 +118,7 @@
 @endsection
 
 @push('js')
-    {{-- Sertakan jQuery dan Bootstrap JS di layout utama atau di sini --}}
+    {{-- Pastikan jQuery dan Bootstrap JS sudah dimuat di layout utama Anda --}}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
@@ -102,6 +128,10 @@
 
             // Fungsi Pembantu: Format Angka ke Rupiah
             function formatRupiah(number) {
+                // Hanya tampilkan 'Rp' jika nilainya valid
+                if (typeof number !== 'number' || isNaN(number)) {
+                    return 'Rp 0';
+                }
                 return 'Rp ' + new Intl.NumberFormat('id-ID').format(number);
             }
 
@@ -110,23 +140,36 @@
                 localStorage.setItem('kasir_cart', JSON.stringify(cart));
             }
 
-            // Fungsi Utama: Hitung Ulang Total Harga dan Kembalian
+            // Fungsi Utama: Hitung Ulang Total Harga, PPN, dan Kembalian
             function calculateTotals() {
-                let total = 0;
+                let totalBase = 0;
+
                 cart.forEach(item => {
                     item.subtotal = item.price * item.qty;
-                    total += item.subtotal;
+                    totalBase += item.subtotal;
                 });
 
-                const payment = parseInt($('#payment-amount').val()) || 0;
-                const change = Math.max(0, payment - total);
+                const ppnRate = parseFloat($('#ppn-rate').val()) || 0;
 
-                $('#total-price-value').val(total);
-                $('#total-price-display').text(formatRupiah(total));
+                // Perhitungan PPN
+                const ppnAmount = Math.round(totalBase * (ppnRate / 100));
+                const totalFinal = totalBase + ppnAmount;
+
+                const payment = parseInt($('#payment-amount').val()) || 0;
+                const change = Math.max(0, payment - totalFinal);
+
+                // Update Tampilan
+                $('#total-price-base-value').val(totalBase);
+                $('#total-price-final-value').val(totalFinal);
+
+                $('#total-price-base-display').text(formatRupiah(totalBase));
+                $('#ppn-rate-display').text(ppnRate);
+                $('#ppn-amount-display').text(formatRupiah(ppnAmount));
+                $('#total-price-final-display').text(formatRupiah(totalFinal));
                 $('#change-amount-display').text(formatRupiah(change));
 
                 // Enable/Disable tombol Pembayaran
-                const isReadyToPay = total > 0 && payment >= total;
+                const isReadyToPay = totalFinal > 0 && payment >= totalFinal;
                 $('#process-payment-btn').prop('disabled', !isReadyToPay);
 
                 saveCart();
@@ -139,7 +182,7 @@
 
                 if (cart.length === 0) {
                     $cartBody.html(
-                        '<tr><td colspan="6" class="text-center text-muted">Keranjang kosong.</td></tr>');
+                    '<tr><td colspan="6" class="text-center text-muted">Keranjang kosong.</td></tr>');
                     calculateTotals();
                     return;
                 }
@@ -174,10 +217,10 @@
                 const categoryName = $(this).text().trim();
                 const $productsContainer = $('#products-container');
 
-                // 1. SET LOADING STATE AND SHOW MODAL IMMEDIATELY
+                // Tampilkan Popup segera setelah diklik
                 $('#productModalLabel').text(`Memuat Produk Kategori: ${categoryName}...`);
                 $productsContainer.html('<p class="text-center">Memuat...</p>');
-                $('#productModal').modal('show'); // <-- SHOW THE POPUP HERE
+                $('#productModal').modal('show');
 
                 $.ajax({
                     url: `/api/products/${categoryId}`,
@@ -209,14 +252,10 @@
                         `;
                             });
                         }
-
-                        // 2. UPDATE MODAL CONTENT IN SUCCESS CALLBACK
                         $('#productModalLabel').text(`Pilih Produk Kategori: ${categoryName}`);
                         $productsContainer.html(html);
-                        // NOTE: DO NOT CALL modal('show') here again
                     },
                     error: function() {
-                        // 3. HANDLE ERRORS
                         $('#productModalLabel').text('Gagal memuat produk.');
                         $productsContainer.html(
                             '<p class="text-center text-danger">Terjadi kesalahan.</p>');
@@ -240,11 +279,11 @@
                         name: productName,
                         price: productPrice,
                         qty: 1,
-                        subtotal: productPrice
+                        subtotal: productPrice // Akan dihitung ulang di calculateTotals
                     });
                 }
 
-                renderCart(); // Update tampilan transaksi
+                renderCart();
                 $('#productModal').modal('hide'); // Tutup Popup
             });
 
@@ -269,15 +308,17 @@
                 renderCart();
             });
 
-            // 5. Ubah Jumlah Pembayaran
-            $('#payment-amount').on('input', calculateTotals);
+            // 5. Ubah Jumlah Pembayaran & PPN Rate
+            $('#payment-amount, #ppn-rate').on('input', calculateTotals);
 
             // 6. Proses Pembayaran (AJAX POST)
             $('#process-payment-btn').on('click', function() {
-                const total = $('#total-price-value').val();
+                const totalFinal = $('#total-price-final-value').val();
                 const payment = $('#payment-amount').val();
+                const ppnRate = $('#ppn-rate').val();
+                const totalBase = $('#total-price-base-value').val();
 
-                if (cart.length === 0 || payment < total) {
+                if (cart.length === 0 || payment < totalFinal) {
                     alert('Keranjang kosong atau jumlah pembayaran kurang!');
                     return;
                 }
@@ -288,7 +329,9 @@
                         product_id: item.product_id,
                         qty: item.qty,
                     })),
-                    total_price: total,
+                    total_price_base: totalBase,
+                    total_price_final: totalFinal,
+                    ppn_percentage: ppnRate,
                     payment_amount: payment
                 };
 
@@ -301,7 +344,7 @@
                     success: function(response) {
                         alert(`Transaksi Sukses! Kembalian: ${formatRupiah(response.change)}`);
 
-                        // Reset keranjang dan UI
+                        // Reset
                         cart = [];
                         localStorage.removeItem('kasir_cart');
                         $('#payment-amount').val(0);

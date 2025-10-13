@@ -38,6 +38,8 @@
                                 <li><a class="dropdown-item" href="{{ route('category.index') }}">Kategori</a></li>
                                 <li><a class="dropdown-item" href="{{ route('supplier.index') }}">Supplier</a></li>
                                 <li><a class="dropdown-item" href="{{ route('product.index') }}">Produk</a></li>
+                                <li><a class="dropdown-item" href="{{ route('kasir.report.pdf') }}">Generate Laporan
+                                        PDF</a></li>
                             </ul>
                         </li>
                     @endif

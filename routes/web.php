@@ -26,4 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/kasir', [ShoppingController::class, 'index'])->name('kasir.index');
     Route::get('/api/products/{category}', [ShoppingController::class, 'getProductsByCategory']);
     Route::post('/api/transaction/process', [ShoppingController::class, 'processTransaction'])->name('api.transaction.process');
+
+    // Rute Laporan PDF
+    Route::get('/kasir/report/pdf', [ShoppingController::class, 'generateReportPdf'])->name('kasir.report.pdf');
 });

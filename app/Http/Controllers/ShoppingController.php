@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Shopping;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 
 class ShoppingController extends Controller
@@ -26,41 +27,43 @@ class ShoppingController extends Controller
             'cart' => 'required|array',
             'cart.*.product_id' => 'required|exists:products,id',
             'cart.*.qty' => 'required|integer|min:1',
+            'total_price_base' => 'required|integer|min:0', // Total sebelum PPN
+            'total_price_final' => 'required|integer|min:0', // Total setelah PPN
+            'ppn_percentage' => 'required|integer|min:0', // PPN fleksibel dari JS
             'payment_amount' => 'required|integer|min:0',
-            'total_price' => 'required|integer|min:0',
         ]);
 
-        if ($request->payment_amount < $request->total_price) {
-            return response()->json(['success' => false, 'message' => 'Jumlah pembayaran kurang dari total harga.'], 400);
+        if ($request->payment_amount < $request->total_price_final) {
+            return response()->json(['success' => false, 'message' => 'Jumlah pembayaran kurang dari total harga final.'], 400);
         }
 
-        $change = $request->payment_amount - $request->total_price;
+        $change = $request->payment_amount - $request->total_price_final;
+        $ppnRate = $request->ppn_percentage; // Ambil PPN dari request (default 11)
 
         DB::beginTransaction();
         try {
             foreach ($request->cart as $item) {
-                // Gunakan lockForUpdate untuk mencegah race condition pada stok
                 $product = Product::lockForUpdate()->find($item['product_id']);
 
-                if ($product->stock < $item['qty']) {
+                if (!$product || $product->stock < $item['qty']) {
                     DB::rollBack();
-                    return response()->json(['success' => false, 'message' => 'Stok produk ' . $product->name . ' tidak mencukupi.'], 400);
+                    return response()->json(['success' => false, 'message' => 'Stok produk ' . ($product->name ?? 'ID ' . $item['product_id']) . ' tidak mencukupi.'], 400);
                 }
 
-                // Subtotal dihitung sederhana di sini (diskon/ppn 0)
-                $subtotal = $product->price * $item['qty'];
+                $basePrice = $product->price * $item['qty'];
+                $ppnAmount = round($basePrice * ($ppnRate / 100));
+                $finalPricePerItem = $basePrice + $ppnAmount;
 
                 Shopping::create([
-                    'user_id' => Auth::id(), // Asumsi user telah login
+                    'user_id' => Auth::id(),
                     'product_id' => $item['product_id'],
                     'qty' => $item['qty'],
                     'discount' => 0,
-                    'ppn' => 0,
-                    'total_price' => $subtotal,
+                    'ppn' => $ppnRate, // Simpan persentase PPN
+                    'total_price' => $finalPricePerItem, // Harga final per item termasuk PPN
                     'total_back' => $change,
                 ]);
 
-                // Kurangi stok
                 $product->stock -= $item['qty'];
                 $product->save();
             }
@@ -69,7 +72,32 @@ class ShoppingController extends Controller
             return response()->json(['success' => true, 'message' => 'Transaksi berhasil!', 'change' => $change]);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Gagal menyimpan transaksi: ' . $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Gagal menyimpan transaksi: Terjadi kesalahan server.'], 500);
         }
+    }
+
+    // Fungsi baru: Membuat dan Mendownload Laporan PDF
+    public function generateReportPdf(Request $request)
+    {
+        // PENTING: Instal paket dompdf terlebih dahulu:
+        // composer require barryvdh/laravel-dompdf
+
+        // Ambil data transaksi dari database
+        $transactions = Shopping::with('product')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $data = [
+            'title' => 'Laporan Penjualan Kasir',
+            'date' => date('d/m/Y'),
+            'transactions' => $transactions,
+            'total_omzet' => $transactions->sum('total_price'),
+        ];
+
+        // Pastikan Anda membuat view 'cashier.report_pdf'
+        $pdf = App::make('dompdf.wrapper');
+        $pdf->loadView('laporan.pdf', $data);
+
+        return $pdf->download('laporan_penjualan_' . date('Ymd_His') . '.pdf');
     }
 }
