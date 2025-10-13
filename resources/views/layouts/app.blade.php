@@ -25,9 +25,9 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-                    {{-- <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Home</a>
-                    </li> --}}
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/dashboard">Home</a>
+                    </li>
                     @if (Auth::check() && Auth::user()->role == 'admin')
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"

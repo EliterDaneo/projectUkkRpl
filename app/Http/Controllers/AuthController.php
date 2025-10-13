@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
@@ -28,7 +29,8 @@ class AuthController extends Controller
 
     public function dashboard()
     {
-        return view('admin.dashboard');
+        $categories = Category::all();
+        return view('admin.dashboard', compact('categories'));
     }
 
     public function logout(Request $request): RedirectResponse
