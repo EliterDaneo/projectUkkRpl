@@ -29,4 +29,5 @@ Route::middleware('auth')->group(function () {
 
     // Rute Laporan PDF
     Route::get('/kasir/report/pdf', [ShoppingController::class, 'generateReportPdf'])->name('kasir.report.pdf');
+    Route::get('/api/daily-report', [AuthController::class, 'dailyReportApi'])->name('daily.report.api'); // Endpoint untuk AJAX
 });

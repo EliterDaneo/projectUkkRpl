@@ -1,100 +1,118 @@
 @extends('layouts.app', ['title' => 'Halaman Kasir Interaktif'])
 
 @section('content')
-    <div class="container-fluid mt-4">
-        {{-- Tombol Laporan --}}
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="m-0">Sistem Kasir (POS)</h2>
-            <a href="{{ route('kasir.report.pdf') }}" class="btn btn-info" target="_blank">
-                <i class="fas fa-file-pdf"></i> Generate Laporan Penjualan
-            </a>
-        </div>
-        <hr>
 
-        <div class="row">
-            {{-- Kolom Kategori (Kiri: col-md-3) --}}
-            <div class="col-md-3">
-                <div class="card shadow p-3 mb-5 bg-light rounded">
-                    <h4 class="mb-3">Daftar Kategori</h4>
-                    <div class="list-group" id="category-list">
-                        {{-- Kategori akan diambil dari $categories yang di-pass dari Controller --}}
-                        @foreach ($categories as $category)
-                            <button type="button" class="list-group-item list-group-item-action category-item"
-                                data-category-id="{{ $category->id }}">
-                                {{ $category->name }}
-                            </button>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-
-            {{-- Kolom Transaksi (Kanan: col-md-9) --}}
-            <div class="col-md-9">
-                <div class="card shadow p-3">
-                    <h4 class="mb-4">Keranjang Transaksi</h4>
-
-                    <div class="table-responsive mb-4">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Produk</th>
-                                    <th style="width: 120px;">Qty</th>
-                                    <th>Harga Satuan</th>
-                                    <th>Subtotal</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cart-body">
-                                {{-- Item keranjang akan di-inject oleh JavaScript --}}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {{-- Total, PPN, dan Pembayaran --}}
-                    <div class="row">
-                        <div class="col-md-6">
-                            {{-- Input PPN yang Fleksibel --}}
-                            <div class="mb-3">
-                                <label for="ppn-rate" class="form-label">Persentase PPN (%)</label>
-                                <input type="number" id="ppn-rate" class="form-control" value="11" min="0"
-                                    max="100">
-                            </div>
-
-                            {{-- Tampilan Rincian Harga --}}
-                            <h5 class="mt-3">Total Harga (Base): <span class="badge bg-secondary"
-                                    id="total-price-base-display">Rp 0</span></h5>
-                            <h5>PPN <span id="ppn-rate-display">11</span>%: <span class="badge bg-warning text-dark"
-                                    id="ppn-amount-display">Rp 0</span></h5>
-                            <hr>
-                            <h5 class="text-success">TOTAL BAYAR: <span class="badge bg-success fs-5"
-                                    id="total-price-final-display">Rp 0</span></h5>
-
-                            <input type="hidden" id="total-price-base-value" value="0">
-                            <input type="hidden" id="total-price-final-value" value="0">
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="payment-amount" class="form-label">Jumlah Pembayaran (Uang Tunai)</label>
-                                <input type="number" id="payment-amount" class="form-control" value="0"
-                                    min="0">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Kembalian</label>
-                                <p class="form-control-static fs-4 text-danger" id="change-amount-display">Rp 0</p>
-                            </div>
-
-                            <button class="btn btn-primary w-100" id="process-payment-btn" disabled>
-                                <i class="fas fa-money-bill-wave"></i> Proses Pembayaran
-                            </button>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
+    <div class="alert alert-success mt-4" role="alert">
+        Selamat datang : {{ Auth::user()->name }} role anda adalah
+        <strong>{{ Auth::user()->role }}</strong>
     </div>
+
+    @if (Auth::user()->role == 'admin')
+        <h3>Statistik Transaksi Harian</h3>
+        <div style="margin-bottom: 20px;">
+            <label for="report-date">Pilih Tanggal:</label>
+            <input type="date" id="report-date" value="{{ $todayDate }}" onchange="fetchDataAndRenderChart()">
+        </div>
+
+        <div style="width: 90%; max-width: 900px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px;">
+            <canvas id="dailyReportChart"></canvas>
+        </div>
+    @else
+        <div class="container-fluid mt-4">
+            {{-- Tombol Laporan --}}
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="m-0">Sistem Kasir (POS)</h2>
+                <a href="{{ route('kasir.report.pdf') }}" class="btn btn-info" target="_blank">
+                    <i class="fas fa-file-pdf"></i> Generate Laporan Penjualan
+                </a>
+            </div>
+            <hr>
+
+            <div class="row">
+                {{-- Kolom Kategori (Kiri: col-md-3) --}}
+                <div class="col-md-3">
+                    <div class="card shadow p-3 mb-5 bg-light rounded">
+                        <h4 class="mb-3">Daftar Kategori</h4>
+                        <div class="list-group" id="category-list">
+                            {{-- Kategori akan diambil dari $categories yang di-pass dari Controller --}}
+                            @foreach ($categories as $category)
+                                <button type="button" class="list-group-item list-group-item-action category-item"
+                                    data-category-id="{{ $category->id }}">
+                                    {{ $category->name }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Kolom Transaksi (Kanan: col-md-9) --}}
+                <div class="col-md-9">
+                    <div class="card shadow p-3">
+                        <h4 class="mb-4">Keranjang Transaksi</h4>
+
+                        <div class="table-responsive mb-4">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Produk</th>
+                                        <th style="width: 120px;">Qty</th>
+                                        <th>Harga Satuan</th>
+                                        <th>Subtotal</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cart-body">
+                                    {{-- Item keranjang akan di-inject oleh JavaScript --}}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {{-- Total, PPN, dan Pembayaran --}}
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{-- Input PPN yang Fleksibel --}}
+                                <div class="mb-3">
+                                    <label for="ppn-rate" class="form-label">Persentase PPN (%)</label>
+                                    <input type="number" id="ppn-rate" class="form-control" value="11" min="0"
+                                        max="100">
+                                </div>
+
+                                {{-- Tampilan Rincian Harga --}}
+                                <h5 class="mt-3">Total Harga (Base): <span class="badge bg-secondary"
+                                        id="total-price-base-display">Rp 0</span></h5>
+                                <h5>PPN <span id="ppn-rate-display">11</span>%: <span class="badge bg-warning text-dark"
+                                        id="ppn-amount-display">Rp 0</span></h5>
+                                <hr>
+                                <h5 class="text-success">TOTAL BAYAR: <span class="badge bg-success fs-5"
+                                        id="total-price-final-display">Rp 0</span></h5>
+
+                                <input type="hidden" id="total-price-base-value" value="0">
+                                <input type="hidden" id="total-price-final-value" value="0">
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="payment-amount" class="form-label">Jumlah Pembayaran (Uang Tunai)</label>
+                                    <input type="number" id="payment-amount" class="form-control" value="0"
+                                        min="0">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Kembalian</label>
+                                    <p class="form-control-static fs-4 text-danger" id="change-amount-display">Rp 0</p>
+                                </div>
+
+                                <button class="btn btn-primary w-100" id="process-payment-btn" disabled>
+                                    <i class="fas fa-money-bill-wave"></i> Proses Pembayaran
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 
     {{-- Modal (Popup) untuk Daftar Produk --}}
     <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
@@ -120,7 +138,118 @@
 @push('js')
     {{-- Pastikan jQuery dan Bootstrap JS sudah dimuat di layout utama Anda --}}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
 
+    <script>
+        // Ambil data dari PHP/Laravel dan konversi ke JavaScript Object
+        const initialChartData = @json($initialChartData);
+        const apiRoute = "{{ route('daily.report.api') }}"; // Asumsi Anda membuat route bernama 'daily.report.api'
+    </script>
+    <script>
+        let dailyChart = null;
+
+        // Konfigurasi dasar Chart.js
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false, // Penting untuk kontrol ukuran div
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Jam Dalam Sehari'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Pendapatan (Rp)'
+                    },
+                    grid: {
+                        drawOnChartArea: true
+                    }
+                },
+                y2: {
+                    type: 'linear',
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Transaksi'
+                    },
+                    grid: {
+                        drawOnChartArea: false
+                    },
+                    min: 0
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Tren Belanja Harian',
+                    font: {
+                        size: 18
+                    }
+                },
+                legend: {
+                    position: 'top'
+                }
+            }
+        };
+
+        /**
+         * Merender atau memperbarui grafik.
+         */
+        function renderChart(data) {
+            const ctx = document.getElementById('dailyReportChart').getContext('2d');
+
+            chartOptions.plugins.title.text = 'Tren Belanja Harian - ' + data.date;
+
+            if (dailyChart) {
+                dailyChart.data.labels = data.labels;
+                dailyChart.data.datasets = data.datasets;
+                dailyChart.options.plugins.title.text = 'Tren Belanja Harian - ' + data.date;
+                dailyChart.update();
+            } else {
+                dailyChart = new Chart(ctx, {
+                    type: 'bar', // Tipe default, di-override oleh datasets
+                    data: {
+                        labels: data.labels,
+                        datasets: data.datasets
+                    },
+                    options: chartOptions
+                });
+            }
+        }
+
+        /**
+         * Mengambil data dari API saat tanggal diubah.
+         */
+        async function fetchDataAndRenderChart() {
+            const date = document.getElementById('report-date').value;
+
+            try {
+                const response = await fetch(`${apiRoute}?date=${date}`);
+                if (!response.ok) {
+                    throw new Error('Gagal mengambil data laporan');
+                }
+                const chartData = await response.json();
+                renderChart(chartData);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                // Anda bisa menampilkan pesan error yang lebih menarik di sini
+            }
+        }
+
+        // 1. Inisialisasi grafik dengan data yang dibawa dari Controller
+        document.addEventListener('DOMContentLoaded', () => {
+            renderChart(initialChartData);
+        });
+    </script>
     <script>
         $(document).ready(function() {
             // Keranjang disimpan di LocalStorage
@@ -182,7 +311,7 @@
 
                 if (cart.length === 0) {
                     $cartBody.html(
-                    '<tr><td colspan="6" class="text-center text-muted">Keranjang kosong.</td></tr>');
+                        '<tr><td colspan="6" class="text-center text-muted">Keranjang kosong.</td></tr>');
                     calculateTotals();
                     return;
                 }
