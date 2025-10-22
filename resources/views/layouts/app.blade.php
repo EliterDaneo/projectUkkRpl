@@ -38,9 +38,13 @@
                                 <li><a class="dropdown-item" href="{{ route('category.index') }}">Kategori</a></li>
                                 <li><a class="dropdown-item" href="{{ route('supplier.index') }}">Supplier</a></li>
                                 <li><a class="dropdown-item" href="{{ route('product.index') }}">Produk</a></li>
-                                <li><a class="dropdown-item" href="{{ route('kasir.report.pdf') }}">Generate Laporan
-                                        PDF</a></li>
                             </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="{{ route('user.index') }}">User</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="{{ route('kasir.report.pdf') }}">Laporan</a>
                         </li>
                     @endif
                 </ul>

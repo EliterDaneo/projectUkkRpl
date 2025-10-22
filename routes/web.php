@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ShoppingController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\UserCotroller;
 
 Route::middleware('guest')->group(function () {
     Route::get('/', function () {
@@ -30,4 +31,7 @@ Route::middleware('auth')->group(function () {
     // Rute Laporan PDF
     Route::get('/kasir/report/pdf', [ShoppingController::class, 'generateReportPdf'])->name('kasir.report.pdf');
     Route::get('/api/daily-report', [AuthController::class, 'dailyReportApi'])->name('daily.report.api'); // Endpoint untuk AJAX
+
+    //user
+    Route::resource('/user', UserCotroller::class, ['except' => ['show']]); //user.index, user.create, user.store, user.edit, user.update, user.destroy
 });
