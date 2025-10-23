@@ -104,7 +104,7 @@
                                     <td>
                                         <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
                                             data-bs-target="#edit-{{ $d->id }}">
-                                            <i class="bi bi-trash"></i>
+                                            <i class="bi bi-pencil"></i>
                                             Edit
                                         </button>
 
@@ -223,8 +223,7 @@
                                                             <strong>{{ $d->name }}</strong>
                                                         </p>
                                                     </div>
-                                                    <form action="{{ route('user.destroy', $d->id) }}"
-                                                        method="post">
+                                                    <form action="{{ route('user.destroy', $d->id) }}" method="post">
                                                         @csrf
                                                         @method('DELETE')
                                                         <div class="modal-footer">

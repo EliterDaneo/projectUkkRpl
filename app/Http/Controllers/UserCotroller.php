@@ -68,7 +68,28 @@ class UserCotroller extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $data = $request->validate([
+            'name' => 'required|min:3|unique:users,name,' . $id,
+            'email' => 'required|email|unique:users,email,' . $id,
+            'role' => 'required|in:admin,user',
+            'password' => 'nullable|min:4',
+        ]);
+
+        $user = User::findOrFail($id);
+
+        // Update field utama
+        $user->name = $data['name'];
+        $user->email = $data['email'];
+        $user->role = $data['role'];
+
+        // Jika password diisi, baru update dan hash
+        if (!empty($data['password'])) {
+            $user->password = bcrypt($data['password']);
+        }
+
+        $user->save();
+
+        return back()->with('success', 'User berhasil diperbarui.');
     }
 
     /**
@@ -76,6 +97,8 @@ class UserCotroller extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $user = User::findOrFail($id);
+        $user->delete();
+        return back()->with('success', 'User Berhasil dihapus');
     }
 }
