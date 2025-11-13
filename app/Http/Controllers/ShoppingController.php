@@ -20,6 +20,18 @@ class ShoppingController extends Controller
         return response()->json($products);
     }
 
+    private function diskon($qty)
+    {
+        $diskon = 0;
+        if($qty > 10){
+            $diskon = 10000;
+        }elseif ($qty > 5) {
+            $diskon = 5000
+        }else {
+            $diskon = 0;
+        }
+    }
+
     // API: Proses pembayaran dan simpan transaksi (AJAX POST)
     public function processTransaction(Request $request)
     {
