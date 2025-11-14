@@ -20,19 +20,6 @@ class ShoppingController extends Controller
         return response()->json($products);
     }
 
-    private function diskon($qty)
-    {
-        $diskon = 0;
-        if($qty > 10){
-            $diskon = 10000;
-        }elseif ($qty > 5) {
-            $diskon = 5000
-        }else {
-            $diskon = 0;
-        }
-    }
-
-    // API: Proses pembayaran dan simpan transaksi (AJAX POST)
     public function processTransaction(Request $request)
     {
         $request->validate([
@@ -46,46 +33,76 @@ class ShoppingController extends Controller
         ]);
 
         if ($request->payment_amount < $request->total_price_final) {
-            return response()->json(['success' => false, 'message' => 'Jumlah pembayaran kurang dari total harga final.'], 400);
+            return response()->json([
+                'success' => false,
+                'message' => 'Jumlah pembayaran kurang dari total harga final.'
+            ], 400);
         }
 
         $change = $request->payment_amount - $request->total_price_final;
-        $ppnRate = $request->ppn_percentage; // Ambil PPN dari request (default 11)
+        $ppnRate = $request->ppn_percentage;
 
         DB::beginTransaction();
         try {
             foreach ($request->cart as $item) {
-                $product = Product::lockForUpdate()->find($item['product_id']);
+                $product = Products::lockForUpdate()->find($item['product_id']);
 
                 if (!$product || $product->stock < $item['qty']) {
                     DB::rollBack();
-                    return response()->json(['success' => false, 'message' => 'Stok produk ' . ($product->name ?? 'ID ' . $item['product_id']) . ' tidak mencukupi.'], 400);
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Stok produk ' . ($product->name ?? 'ID ' . $item['product_id']) . ' tidak mencukupi.'
+                    ], 400);
                 }
 
+                // Hitung harga dasar dan diskon
                 $basePrice = $product->price * $item['qty'];
-                $ppnAmount = round($basePrice * ($ppnRate / 100));
-                $finalPricePerItem = $basePrice + $ppnAmount;
+                $calculatedDiscount = $this->diskon($item['qty']);
+                $priceAfterDiscount = max($basePrice - $calculatedDiscount, 0);
 
+                // Hitung PPN setelah diskon
+                $ppnAmount = round($priceAfterDiscount * ($ppnRate / 100));
+                $finalPricePerItem = $priceAfterDiscount + $ppnAmount;
+
+                // Simpan transaksi per item
                 Shopping::create([
                     'user_id' => Auth::id(),
                     'product_id' => $item['product_id'],
                     'qty' => $item['qty'],
-                    'discount' => 0,
-                    'ppn' => $ppnRate, // Simpan persentase PPN
-                    'total_price' => $finalPricePerItem, // Harga final per item termasuk PPN
+                    'discount' => $calculatedDiscount,
+                    'ppn' => $ppnRate,
+                    'total_price' => $finalPricePerItem,
                     'total_back' => $change,
                 ]);
 
+                // Update stok
                 $product->stock -= $item['qty'];
                 $product->save();
             }
 
             DB::commit();
-            return response()->json(['success' => true, 'message' => 'Transaksi berhasil!', 'change' => $change]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Transaksi berhasil!',
+                'change' => $change
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Gagal menyimpan transaksi: Terjadi kesalahan server.'], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan transaksi: ' . $e->getMessage()
+            ], 500);
         }
+    }
+
+    private function diskon($qty)
+    {
+        if ($qty > 10) {
+            return 10000;
+        } elseif ($qty >= 5) {
+            return 5000;
+        }
+        return 0;
     }
 
     // Fungsi baru: Membuat dan Mendownload Laporan PDF

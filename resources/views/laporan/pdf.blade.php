@@ -66,6 +66,7 @@
                 <th>Produk</th>
                 <th>Qty</th>
                 <th>PPN (%)</th>
+                <th>Diskon</th>
                 <th>Harga Final (per item)</th>
             </tr>
         </thead>
@@ -78,6 +79,7 @@
                     <td>{{ $transaction->product->name ?? 'N/A' }}</td>
                     <td class="rupiah">{{ $transaction->qty }}</td>
                     <td class="rupiah">{{ $transaction->ppn }}</td>
+                    <td class="rupiah">{{ $transaction->discount }}</td>
                     <td class="rupiah">Rp {{ number_format($transaction->total_price, 0, ',', '.') }}</td>
                 </tr>
             @endforeach
